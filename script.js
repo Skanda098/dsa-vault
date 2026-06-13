@@ -4,8 +4,8 @@ let canvas, ctx, isDrawing = false;
 // ==========================================
 // DEPLOYMENT SETTING
 // ==========================================
+// const API_BASE_URL = 'http://127.0.0.1:5000/api'; 
 const API_BASE_URL = 'https://skanda100.pythonanywhere.com/api'; 
-// const API_BASE_URL = 'https://YOUR_USERNAME.pythonanywhere.com/api'; 
 
 document.addEventListener('DOMContentLoaded', async () => {
     await fetchNotesFromBackend();
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.addEventListener('mousemove', (e) => {
-        if (window.innerWidth > 768) { // Prevent hover previews on mobile devices
+        if (window.innerWidth > 768) { 
             const previewBox = document.getElementById('hover-preview');
             if (previewBox.style.display === 'block') {
                 previewBox.style.left = (e.pageX + 20) + 'px';
@@ -108,7 +108,14 @@ function formatToIST(utcDateString) {
 
 // --- RENDER LOGIC & MARKDOWN PARSING ---
 function stripImagesForPreview(text) {
-    return text.replace(/!\[.*?\]\(.*?\)/g, '[Image Attached] ');
+    if (!text) return "";
+    // 1. Replace structural HTML tags with spaces so words do not merge
+    let plainText = text.replace(/<\/?(div|p|br|h[1-6])[^>]*>/gi, ' ');
+    // 2. Strip all remaining HTML tags (like <a>, <b>)
+    plainText = plainText.replace(/<[^>]+>/g, '');
+    // 3. Strip Markdown images
+    plainText = plainText.replace(/!\[.*?\]\(.*?\)/g, '[Image Attached] ');
+    return plainText.trim();
 }
 
 function renderMarkdownImages(text) {
@@ -230,7 +237,6 @@ function showTab(tabId) {
     document.getElementById(tabId).classList.add('active');
     event.currentTarget.classList.add('active');
     
-    // Auto-close sidebar on mobile
     if (window.innerWidth <= 768) {
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('mobile-overlay').classList.remove('show');
