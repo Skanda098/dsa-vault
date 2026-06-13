@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DSA Vault</title>
+    
+    <link rel="icon" type="image/png" href="favicon.png">
+    
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fira+Code&display=swap"
         rel="stylesheet">
@@ -13,7 +16,9 @@
 
 <body>
     <div class="app-container">
-        <aside class="sidebar">
+        <div id="mobile-overlay" class="overlay" onclick="toggleSidebar()"></div>
+
+        <aside class="sidebar" id="sidebar">
             <h1 class="logo">DSA<span>_Vault</span></h1>
             <nav>
                 <button class="nav-btn active" onclick="showTab('all-notes')">All Notes</button>
@@ -23,10 +28,17 @@
         </aside>
 
         <main class="content">
+            <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+
             <section id="all-notes" class="tab-content active">
                 <header class="section-header">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem;">
+                    <div class="header-top-row">
                         <div>
                             <h2>Note Archive</h2>
                             <p>All your saved algorithms, problems, and concepts.</p>
@@ -132,8 +144,7 @@
                     </div>
 
                     <textarea id="note-content"
-                        placeholder="Write your logic and code here...\n\n```java\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"
-                        Hello\");\n }\n}\n```" required></textarea>
+                        placeholder="Write your logic and code here...\n\n```java\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello\");\n    }\n}\n```" required></textarea>
 
                     <div class="media-toolbar">
                         <label class="btn-secondary media-upload">📸 Insert Image <input type="file"
@@ -152,7 +163,7 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeNoteModal()">&times;</span>
             <div id="modal-read-view">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div class="modal-header-row">
                     <h2 id="modal-title-display"></h2>
                     <button class="btn-secondary" onclick="toggleEditMode(true)">✏️ Edit Note</button>
                 </div>
