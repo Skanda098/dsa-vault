@@ -3,10 +3,8 @@ let canvas, ctx, isDrawing = false;
 
 // ==========================================
 // DEPLOYMENT SETTING
-// 1. When testing on your laptop, use localhost
-// 2. When deployed, change this to your PythonAnywhere URL
 // ==========================================
-const API_BASE_URL = 'https://skanda100.pythonanywhere.com/api'; 
+const API_BASE_URL = 'http://127.0.0.1:5000/api'; 
 // const API_BASE_URL = 'https://YOUR_USERNAME.pythonanywhere.com/api'; 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -39,10 +37,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.addEventListener('mousemove', (e) => {
-        const previewBox = document.getElementById('hover-preview');
-        if (previewBox.style.display === 'block') {
-            previewBox.style.left = (e.pageX + 20) + 'px';
-            previewBox.style.top = (e.pageY + 20) + 'px';
+        if (window.innerWidth > 768) { // Prevent hover previews on mobile devices
+            const previewBox = document.getElementById('hover-preview');
+            if (previewBox.style.display === 'block') {
+                previewBox.style.left = (e.pageX + 20) + 'px';
+                previewBox.style.top = (e.pageY + 20) + 'px';
+            }
         }
     });
 
@@ -53,6 +53,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupImagePaste('note-content');
     setupImagePaste('edit-content'); 
 });
+
+// --- SIDEBAR TOGGLE LOGIC ---
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobile-overlay');
+    
+    if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    } else {
+        sidebar.classList.toggle('collapsed');
+    }
+}
 
 // --- ADVANCED FILTERING & SORTING LOGIC ---
 function filterNotes() {
@@ -140,8 +153,11 @@ function renderNotes(dataToRender = notes) {
         const card = document.createElement('div');
         card.className = 'note-card';
         card.onclick = () => openNoteModal(note.id);
-        card.addEventListener('mouseenter', () => showHoverPreview(note));
-        card.addEventListener('mouseleave', hideHoverPreview);
+        
+        if (window.innerWidth > 768) {
+            card.addEventListener('mouseenter', () => showHoverPreview(note));
+            card.addEventListener('mouseleave', hideHoverPreview);
+        }
 
         const safePreviewContent = stripImagesForPreview(note.content);
         const formattedDate = formatToIST(note.dateCreated);
@@ -213,6 +229,13 @@ function showTab(tabId) {
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     event.currentTarget.classList.add('active');
+    
+    // Auto-close sidebar on mobile
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('mobile-overlay').classList.remove('show');
+    }
+
     if (tabId === 'all-notes') {
         setTimeout(() => document.getElementById('search-input').focus(), 100);
     }
@@ -307,11 +330,9 @@ function setupImageUploader(inputId, textareaId) {
     });
 }
 
-// FIX: Correctly intercept and paste clipboard images into the textarea
 function setupImagePaste(textareaId) {
     const textarea = document.getElementById(textareaId);
     if (!textarea) return;
-    
     textarea.addEventListener('paste', (e) => {
         const items = (e.clipboardData || e.originalEvent.clipboardData).items;
         for (let i = 0; i < items.length; i++) {
@@ -320,12 +341,9 @@ function setupImagePaste(textareaId) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const start = textarea.selectionStart;
-                    const end = textarea.selectionEnd;
                     const text = textarea.value;
                     const pasteText = `\n![Pasted Image](${event.target.result})\n`;
-                    
-                    textarea.value = text.substring(0, start) + pasteText + text.substring(end);
-                    // Move cursor past the injected image
+                    textarea.value = text.substring(0, start) + pasteText + text.substring(textarea.selectionEnd);
                     textarea.selectionStart = textarea.selectionEnd = start + pasteText.length;
                 };
                 reader.readAsDataURL(items[i].getAsFile());
