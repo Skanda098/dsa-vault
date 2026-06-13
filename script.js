@@ -6,7 +6,7 @@ let canvas, ctx, isDrawing = false;
 // 1. When testing on your laptop, use localhost
 // 2. When deployed, change this to your PythonAnywhere URL
 // ==========================================
-const API_BASE_URL = 'http://127.0.0.1:5000/api'; 
+const API_BASE_URL = 'https://skanda100.pythonanywhere.com/api'; 
 // const API_BASE_URL = 'https://YOUR_USERNAME.pythonanywhere.com/api'; 
 
 document.addEventListener('DOMContentLoaded', async () => {
