@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Vault</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fira+Code&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <h1 class="logo">DSA<span>_Vault</span></h1>
+            <nav>
+                <button class="nav-btn active" onclick="showTab('all-notes')">All Notes</button>
+                <button class="nav-btn" onclick="showTab('custom-notes')">Add Custom Notes</button>
+                <button class="nav-btn" onclick="showTab('editor')">New Problem Note</button>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <section id="all-notes" class="tab-content active">
+                <header class="section-header">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem;">
+                        <div>
+                            <h2>Note Archive</h2>
+                            <p>All your saved algorithms, problems, and concepts.</p>
+                        </div>
+                        <div class="export-all-group">
+                            <button class="btn-danger" onclick="deleteAllNotes()">🗑 Delete All</button>
+                            <button class="btn-secondary" onclick="exportAllNotes('pdf')">Export PDF</button>
+                            <button class="btn-secondary" onclick="exportAllNotes('html')">Export HTML</button>
+                            <button class="btn-secondary" onclick="exportAllNotes('markdown')">Export MD</button>
+                        </div>
+                    </div>
+
+                    <div class="search-container">
+                        <input type="text" id="search-input" class="search-bar"
+                            placeholder="🔍 Search notes, Big-O, tags, or code... (Ctrl+F)" oninput="filterNotes()">
+
+                        <div class="controls-row">
+                            <select id="filter-type" class="filter-dropdown" onchange="filterNotes()">
+                                <option value="all">All Types</option>
+                                <option value="problem">Problem Notes</option>
+                                <option value="custom">Custom Notes</option>
+                            </select>
+
+                            <select id="filter-complexity" class="filter-dropdown" onchange="filterNotes()">
+                                <option value="all">All Complexities</option>
+                                <option value="O(1)">O(1)</option>
+                                <option value="O(log N)">O(log N)</option>
+                                <option value="O(N)">O(N)</option>
+                                <option value="O(N log N)">O(N log N)</option>
+                                <option value="O(N²)">O(N²)</option>
+                            </select>
+
+                            <select id="sort-date" class="filter-dropdown" onchange="filterNotes()">
+                                <option value="desc">Date: Newest First</option>
+                                <option value="asc">Date: Oldest First</option>
+                            </select>
+                        </div>
+                    </div>
+                </header>
+                <div id="all-notes-grid" class="notes-grid"></div>
+            </section>
+
+            <section id="custom-notes" class="tab-content">
+                <header class="section-header">
+                    <h2>Add Custom Note</h2>
+                </header>
+                <form id="custom-note-form" class="editor-form">
+                    <input type="text" id="custom-title" placeholder="Note Title" required>
+                    <div class="metadata-row">
+                        <div class="input-group"><label>Topic</label><input type="text" id="custom-topic"
+                                placeholder="e.g., System Design"></div>
+                        <div class="input-group"><label>Subtopic</label><input type="text" id="custom-subtopic"
+                                placeholder="e.g., Authentication"></div>
+                    </div>
+                    <textarea id="custom-content" placeholder="Write your theory notes here... (Ctrl+V to paste images)"
+                        required></textarea>
+                    <div class="media-toolbar">
+                        <label class="btn-secondary media-upload">📸 Insert Image <input type="file"
+                                id="custom-image-upload" accept="image/*" style="display: none;"></label>
+                    </div>
+                    <div class="form-actions" style="justify-content: flex-end;"><button type="submit"
+                            class="btn-primary">Save Custom Note</button></div>
+                </form>
+            </section>
+
+            <section id="editor" class="tab-content">
+                <header class="section-header">
+                    <h2>Create Problem Note</h2>
+                </header>
+                <form id="note-form" class="editor-form">
+                    <input type="text" id="note-title" placeholder="Problem Title (e.g., Two Sum)" required>
+                    <div class="metadata-row">
+                        <div class="input-group">
+                            <label>Time Complexity</label>
+                            <select id="time-complexity">
+                                <option value="O(1)">O(1)</option>
+                                <option value="O(log N)">O(log N)</option>
+                                <option value="O(N)">O(N)</option>
+                                <option value="O(N log N)">O(N log N)</option>
+                                <option value="O(N²)">O(N²)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Space Complexity</label>
+                            <select id="space-complexity">
+                                <option value="O(1)">O(1)</option>
+                                <option value="O(log N)">O(log N)</option>
+                                <option value="O(N)">O(N)</option>
+                                <option value="O(N²)">O(N²)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="whiteboard-container">
+                        <div class="whiteboard-header">
+                            <span>Draw Memory Stack / Graph</span>
+                            <button type="button" class="btn-secondary btn-small"
+                                onclick="clearWhiteboard()">Clear</button>
+                        </div>
+                        <div class="canvas-wrapper"><canvas id="whiteboard" width="1200" height="2500"></canvas></div>
+                        <button type="button" class="btn-secondary btn-small" style="margin-top: 10px;"
+                            onclick="saveWhiteboardToNote()">Insert Drawing into Note</button>
+                    </div>
+
+                    <textarea id="note-content"
+                        placeholder="Write your logic and code here...\n\n```java\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"
+                        Hello\");\n }\n}\n```" required></textarea>
+
+                    <div class="media-toolbar">
+                        <label class="btn-secondary media-upload">📸 Insert Image <input type="file"
+                                id="note-image-upload" accept="image/*" style="display: none;"></label>
+                    </div>
+
+                    <div class="form-actions" style="justify-content: flex-end;"><button type="submit"
+                            class="btn-primary">Save Note</button></div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <div id="hover-preview" class="hover-preview-box"></div>
+    <div id="note-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeNoteModal()">&times;</span>
+            <div id="modal-read-view">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <h2 id="modal-title-display"></h2>
+                    <button class="btn-secondary" onclick="toggleEditMode(true)">✏️ Edit Note</button>
+                </div>
+                <div id="modal-meta-display" class="modal-meta"></div>
+                <div id="modal-content-display" class="rendered-markdown"></div>
+
+                <div id="modal-terminal-wrapper" class="terminal-container" style="display: none; margin-top: 2rem;">
+                    <div class="terminal-header">
+                        <span>Terminal Sandbox</span>
+                        <button type="button" class="btn-run"
+                            onclick="runJavaCode('modal-raw-content', 'modal-terminal-output')">▶ Run Code</button>
+                    </div>
+                    <pre id="modal-terminal-output" class="terminal-output">Awaiting execution...</pre>
+                </div>
+            </div>
+
+            <div id="modal-edit-view" style="display: none;">
+                <h2 style="margin-bottom: 1rem; color: var(--accent);">Edit Note</h2>
+                <input type="hidden" id="edit-note-id">
+                <input type="hidden" id="edit-note-type">
+                <input type="text" id="edit-title" class="edit-input" required>
+                <div id="edit-meta-problem" class="metadata-row" style="margin-bottom: 1rem; display: none;">
+                    <div class="input-group"><label>Time</label><select id="edit-time" class="edit-input">
+                            <option value="O(1)">O(1)</option>
+                            <option value="O(log N)">O(log N)</option>
+                            <option value="O(N)">O(N)</option>
+                            <option value="O(N log N)">O(N log N)</option>
+                            <option value="O(N²)">O(N²)</option>
+                        </select></div>
+                    <div class="input-group"><label>Space</label><select id="edit-space" class="edit-input">
+                            <option value="O(1)">O(1)</option>
+                            <option value="O(log N)">O(log N)</option>
+                            <option value="O(N)">O(N)</option>
+                            <option value="O(N²)">O(N²)</option>
+                        </select></div>
+                </div>
+                <div id="edit-meta-custom" class="metadata-row" style="margin-bottom: 1rem; display: none;">
+                    <div class="input-group"><label>Topic</label><input type="text" id="edit-topic" class="edit-input">
+                    </div>
+                    <div class="input-group"><label>Subtopic</label><input type="text" id="edit-subtopic"
+                            class="edit-input"></div>
+                </div>
+                <textarea id="edit-content" class="edit-textarea" required></textarea>
+                <input type="hidden" id="modal-raw-content">
+                <div class="form-actions" style="justify-content: flex-end; gap: 1rem;">
+                    <button class="btn-secondary" onclick="toggleEditMode(false)">Cancel</button>
+                    <button class="btn-primary" onclick="saveEditedNote()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
